@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
@@ -19,6 +20,8 @@ namespace System.IO
         public static readonly char AltDirectorySeparatorChar = PathInternal.AltDirectorySeparatorChar;
         public static readonly char VolumeSeparatorChar = PathInternal.VolumeSeparatorChar;
         public static readonly char PathSeparator = PathInternal.PathSeparator;
+
+        private static readonly SearchValues<char> DirectoryAndExtensionSearchValues = SearchValues.Create(DirectoryAndExtensionSeparatorChars);
 
         // For generating random file names
         // 8 random bytes provides 12 chars in our encoding for the 8.3 name.
@@ -194,22 +197,14 @@ namespace System.IO
         /// </remarks>
         public static ReadOnlySpan<char> GetExtension(ReadOnlySpan<char> path)
         {
-            int length = path.Length;
+            int lastDelimiter = path.LastIndexOfAny(DirectoryAndExtensionSearchValues);
 
-            for (int i = length - 1; i >= 0; i--)
+            if (lastDelimiter == -1 || lastDelimiter == (path.Length - 1) || path[lastDelimiter] != '.')
             {
-                char ch = path[i];
-                if (ch == '.')
-                {
-                    if (i != length - 1)
-                        return path.Slice(i, length - i);
-                    else
-                        return ReadOnlySpan<char>.Empty;
-                }
-                if (PathInternal.IsDirectorySeparator(ch))
-                    break;
+                return ReadOnlySpan<char>.Empty;
             }
-            return ReadOnlySpan<char>.Empty;
+
+            return path[lastDelimiter..];
         }
 
         /// <summary>

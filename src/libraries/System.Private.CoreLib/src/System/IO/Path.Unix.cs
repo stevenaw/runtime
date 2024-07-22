@@ -9,6 +9,8 @@ namespace System.IO
 {
     public static partial class Path
     {
+        private static ReadOnlySpan<char> DirectoryAndExtensionSeparatorChars => ['.', PathInternal.AltDirectorySeparatorChar, PathInternal.VolumeSeparatorChar];
+
         public static char[] GetInvalidFileNameChars() => new char[] { '\0', '/' };
 
         public static char[] GetInvalidPathChars() => new char[] { '\0' };

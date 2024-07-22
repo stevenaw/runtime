@@ -10,6 +10,8 @@ namespace System.IO
 {
     public static unsafe partial class Path
     {
+        private static ReadOnlySpan<char> DirectoryAndExtensionSeparatorChars => ['.', PathInternal.AltDirectorySeparatorChar, PathInternal.DirectorySeparatorChar, PathInternal.VolumeSeparatorChar];
+
         private static volatile delegate* unmanaged<int, char*, uint> s_GetTempPathWFunc;
 
         public static char[] GetInvalidFileNameChars() =>
